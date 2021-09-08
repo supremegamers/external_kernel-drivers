@@ -1,105 +1,166 @@
-rtw88
-===========
-### A repo for the newest Realtek rtlwifi codes.
+# Realtek RTL8821CE Driver
 
-This code will build on any kernel 4.19 and newer as long as the distro has not modified
-any of the kernel APIs. IF YOU RUN UBUNTU, YOU CAN BE ASSURED THAT THE APIs HAVE CHANGED.
-NO, I WILL NOT MODIFY THE SOURCE FOR YOU. YOU ARE ON YOUR OWN!!!!!
+## Intent
+This repository hosts the code for the [Arch Linux AUR Package](https://aur.archlinux.org/packages/rtl8821ce-dkms-git/). It's targeting Linux > 4.14 and is being developed for Arch Linux and Ubuntu 18.10. No support will be provided for other Linux distributions or Linux Kernel versions outside of that range.
 
-This repository includes drivers for the following cards:
+## Disclaimer
+The maintainers of this repository are not Realtek employees and are maintaining this repository for their own usage. Further feature development (such as proper power saving, etc.) will not be pursued here, but will be gladly integrated if newer driver sources are provided by Realtek. Use at your own risk.
 
-RTL8822BE, RTL8822CE, RTL8821CE, and RTL8723DE
-
-If you are looking for a driver for chips such as 
-RTL8188EE, RTL8192CE, RTL8192CU, RTL8192DE, RTL8192EE, RTL8192SE, RTL8723AE, RTL8723BE, or RTL8821AE,
-these should be provided by your kernel. If not, then you should go to the Backports Project
-(https://backports.wiki.kernel.org/index.php/Main_Page) to obtain the necessary code.
-
-This repo has been brought up to date with the kernel code on Sep. 25, 2020.
-
-The main changes are as follows:
-1. The methods for obtaining DMA buffers has changed. This should have no effect.
-2. The regulatory methods are changed. This may have some effect on users.
-3. The firmware loading has been more resistent against timeouts.
-4. The RX buffer size is increased.
-5. Antenna selection code was modified. This change may help the low signal problems.
-6. BlueTooth coexistence was modified.
-
-When making these changes, I tried to watch for things that might be incompatible
-with older kernels. As this kind of updating in really boring, I might have missed
-something. Please let me know of build problems.
+## DKMS
+This driver can be installed using [DKMS](http://linux.dell.com/dkms/). This is a system which will automatically recompile and install a kernel module when a new kernel gets installed or updated. To make use of DKMS, install the `dkms` package.
 
 
-### Installation instruction
-##### Requirements
-You will need to install "make", "gcc", "kernel headers", "kernel build essentials", and "git".
-You can install them with the following command, on **Ubuntu**:
-```bash
-sudo apt-get update
-sudo apt-get install make gcc linux-headers-$(uname -r) build-essential git
+## Installation of Driver
+Make sure you have a proper build environment and `dkms` installed.
+
+### Ubuntu & Debian
+The following steps are required prior to building the driver on Ubuntu/Debian:
 ```
-If any of the packets above are not found check if your distro installs them like that. 
-
-##### Installation
-For all distros:
-```bash
-git clone https://github.com/lwfinger/rtw88.git
-cd rtw88
-make
-sudo make install
+sudo apt install bc module-assistant build-essential dkms
+sudo m-a prepare
 ```
-##### Blacklisting (needed if you want to use these modules)
-Some distros provide `RTL8723DE` drivers. To use this driver, that one MUST be
-blacklisted. How to do that is left as an exercise as learning that will be very beneficial.
+Ubuntu users may also install the prebuilt [rtl8821ce-dkms](https://packages.ubuntu.com/bionic-updates/rtl8821ce-dkms) package, an older version of the driver maintained by the Ubuntu MOTU Developers group for bionic, eoan and focal. It has been known to work in cases where the newer driver available here does not. Bugs and issues with that package should be reported at [Launchpad](https://launchpad.net/ubuntu/+source/rtl8821ce/+bugs) rather than here.
 
-If your system has ANY conflicting drivers installed, you must blacklist them as well. For kernels
-5.6 and newer, this will include drivers such as rtw88_xxxx.
-Here is a useful [link](https://askubuntu.com/questions/110341/how-to-blacklist-kernel-modules) on how to blacklist a module
+### Arch Linux
+Make sure you have the `base-devel` package group installed before you proceed for the necessary compilation tools.
 
-Once you have reached this point, then reboot. Use the command `lsmod | grep rtw` and check if there are any
-conflicting drivers. The correct ones are:
-- `rtw_8723de  rtw_8723d  rtw_8822be  rtw_8822b  rtw_8822ce  rtw_8822c  rtw_core  and rtw_pci`
+#### Installing from AUR
 
-If you have other modules installed, see if you blacklisted them correctly.
+Install [rtl8821ce-dkms-git](https://aur.archlinux.org/packages/rtl8821ce-dkms-git/) from the [AUR](https://wiki.archlinux.org/index.php/Arch_User_Repository).
 
-##### How to disable/enable a Kernel module
- ```bash
-sudo modprobe -r rtw_8723de         #This unloads the module
-sudo modprobe rtw_8723de            #This loads the module
+#### Dependencies for manual installation on Arch Linux
+```
+sudo pacman -Syu linux-headers dkms bc
+```
+If you are running a non-vanilla kernel then install the headers to match the kernel package. Proceed to the section below.
+
+### Gentoo Linux
+An unofficial Gentoo package is available, using this repository as upstream. It is available from the [trolltoo](https://github.com/dallenwilson/trolltoo) overlay. Gentoo does not use or require dkms for packaged drivers.
+```
+# layman -a trolltoo
+# emerge --ask net-wireless/rtl8821ce-driver
 ```
 
-##### Option configuration
-If it turns out that your system needs one of the configuration options, then do the following:
-```bash
-sudo nano /etc/modprobe.d/<dev_name>.conf 
+### Manual installation of driver
+In order to install the driver open a terminal in the directory with the source code and execute the following command:
 ```
-There, enter the line below:
-```bash
-options <device_name> <<driver_option_name>>=<value>
+sudo ./dkms-install.sh
 ```
-The available options for rtw_pci are disable_msi and disable_aspm.
-The available options for rtw_core are lps_deep_mode, support_bf,  and debug_mask.
 
-***********************************************************************************************
+## Removal of Driver
+Open a terminal window and git clone the repository to your local disk
 
-When your kernel changes, then you need to do the following:
-```bash
-cd ~/rtw88
+```
+git clone https://github.com/tomaspinho/rtl8821ce.git
+cd rtl8821ce
+```
+
+Then run the installation script:
+```
+sudo ./dkms-remove.sh
+```
+
+## Upgrading driver
+Remove the driver:
+```
+sudo ./dkms-remove.sh
+```
+
+Make sure you have your local copy of this repository fully updated:
+```
 git pull
-make
-sudo make install
 ```
 
-Remember, this MUST be done whenever you get a new kernel - no exceptions.
+Clean any stale binaries:
+```
+make clean
+```
 
-These drivers will not build for kernels older than 4.14. If you must use an older kernel,
-submit a GitHub issue with a listing of the build errors. Without the errors, the issue
-will be ignored. I am not a mind reader.
+Install again:
+```
+sudo ./dkms-install.sh
+```
 
-When you have problems where the driver builds and loads correctly, but fails to work, a GitHub
-issue is NOT the best place to report it. I have no idea of the internal workings of any of the
-chips, and the Realtek engineers who do will not read these issues. To reach them, send E-mail to
-linux-wireless@vger.kernel.org. Include a detailed description of any messages in the kernel
-logs and any steps that you have taken to analyze or fix the problem. If your description is
-not complete, you are unlikely to get any satisfaction.
+## Reporting issues
+When reporting issues, please make sure that debugging is enabled. To enable debugging either set `MAKEFLAGS="CONFIG_RTW_DEBUG = y"` before compilation or edit Makefile:
+```
+CONFIG_RTW_DEBUG = y
+```
+This will enable verbose debug logging, helpful to developers.
 
+## Possible issues
+
+### PCIe Activate State Power Management
+Your distribution may come with PCIe Active State Power Management enabled by default. That may conflict with this driver. To disable:
+
+```
+sudo $EDITOR /etc/default/grub
+```
+Add pci=noaer at the end of GRUB_CMDLINE_LINUX_DEFAULT. Line should look like this:
+
+```
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash pci=noaer"
+```
+
+Then update your GRUB configuration:
+```
+sudo update-grub
+```
+
+Reboot.
+
+### Lenovo Yoga laptops
+
+Some new Yoga laptops (like the Yoga 530) come with `rtl8821ce` as the Wi-Fi/Bluetooth chip. But the `ideapad-laptop` module, which may come included in your distribution, may conflict with this driver. To disable:
+
+```
+sudo modprobe -r ideapad_laptop
+```
+
+### BlueTooth is not working
+
+This may be due to the Kernel loading up the wrong firmware file for this card. Please take a look at [@wahsot](https://github.com/wahsot)'s tutorial at https://github.com/tomaspinho/rtl8821ce/issues/19#issuecomment-452196840 to see if that helps you out.
+
+### Secure Boot
+
+If your system uses Secure Boot, disable it via BIOS settings, otherwise the kernel will not accept user-supplied modules.
+
+### Unstable connection - slowdowns or dropouts
+
+The problem may be due to the periodic scanning of access points by the network applet.
+
+> This fix worked helpful on Pop! _OS/Ubuntu 20.10 and Fedora 33. Both with GNOME and NetworkManager. [#179](https://github.com/tomaspinho/rtl8821ce/issues/179)
+
+Set the BSSID from your network applet. In GNOME this can be done in `WiFi Settings > Your profile > Identity > BSSID`.
+
+We are going to disable the *Connectivity Check* option in NetworkManager. This by editing the file in `/var/lib/NetworkManager/NetworkManager-intern.conf` and adding the following instructions at the end:
+
+```
+[connectivity]
+.set.enabled=false
+```
+
+Then, just reboot or restart the NetworkManager unit to fix the problem.
+
+### Wi-Fi not working for kernel >= 5.9
+The Linux Kernel 5.9 version comes with a broken `rtw88` module developed by Realtek that has poor compatibility with most revision of the 8821ce chip.
+
+You must disable it by adding the following to your module blacklists (`/etc/modprobe.d/blacklist.conf`):
+
+```
+blacklist rtw88_8821ce
+``` 
+
+Then, make sure you have the rtl8821ce module correctly installed. 
+
+Turn off your computer, wait a few seconds (to force firmware reload) and then turn it on again.
+
+### Wi-Fi and Bluetooth don't work after suspend
+
+This is a bug that won't be fixed until/if Realtek implements proper power management themselves.
+Given they are now only working in `rtw88`, this driver will most likely never be fixed in this regard.
+Please avoid opening issues about this.
+
+### Monitor (promiscuous) mode doesn't work
+This driver doesn't support it and never will.
+Please avoid opening issues about this.

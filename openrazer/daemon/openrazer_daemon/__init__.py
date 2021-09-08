@@ -1,3 +1,0 @@
-"""
-Razer Daemon module
-"""
