@@ -20,7 +20,7 @@
 #ifndef __USB_OPS_H_
 #define __USB_OPS_H_
 
-#include <linux/version.h>
+#include <drv_conf.h>
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <osdep_intf.h>
@@ -30,35 +30,26 @@
 #define REALTEK_USB_VENQT_CMD_REQ	0x05
 #define REALTEK_USB_VENQT_CMD_IDX	0x00
 
-enum {
+enum{
 	VENDOR_WRITE = 0x00,
 	VENDOR_READ = 0x01,
 };
-#define ALIGNMENT_UNIT			16
-#define MAX_VENDOR_REQ_CMD_SIZE	254	/* 8188cu SIE Support */
-#define MAX_USB_IO_CTL_SIZE	(MAX_VENDOR_REQ_CMD_SIZE + ALIGNMENT_UNIT)
+#define ALIGNMENT_UNIT				16
+#define MAX_VENDOR_REQ_CMD_SIZE	254		/* 8188cu SIE Support */
+#define MAX_USB_IO_CTL_SIZE		(MAX_VENDOR_REQ_CMD_SIZE +ALIGNMENT_UNIT)
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 12))
-#define rtw_usb_control_msg(dev, pipe, request, requesttype,		\
-			    value, index, data, size, timeout_ms)	\
-	usb_control_msg((dev), (pipe), (request), (requesttype), (value),\
-			(index), (data), (size), (timeout_ms))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,12))
+#define rtw_usb_control_msg(dev, pipe, request, requesttype, value, index, data, size, timeout_ms) \
+	usb_control_msg((dev), (pipe), (request), (requesttype), (value), (index), (data), (size), (timeout_ms))
 #define rtw_usb_bulk_msg(usb_dev, pipe, data, len, actual_length, timeout_ms) \
-	usb_bulk_msg((usb_dev), (pipe), (data), (len),			\
-		     (actual_length), (timeout_ms))
+	usb_bulk_msg((usb_dev), (pipe), (data), (len), (actual_length), (timeout_ms))
 #else
-#define rtw_usb_control_msg(dev, pipe, request, requesttype,		\
-			    value, index, data, size, timeout_ms)	\
-	usb_control_msg((dev), (pipe), (request), (requesttype),	\
-			(value), (index), (data), (size),		\
-			((timeout_ms) == 0) ||				\
-			((timeout_ms)*HZ/1000 > 0) ?			\
-			((timeout_ms)*HZ/1000) : 1)
-#define rtw_usb_bulk_msg(usb_dev, pipe, data, len,			\
-			 actual_length, timeout_ms) \
+#define rtw_usb_control_msg(dev, pipe, request, requesttype, value, index, data, size,timeout_ms) \
+	usb_control_msg((dev), (pipe), (request), (requesttype), (value), (index), (data), (size), \
+		((timeout_ms) == 0) ||((timeout_ms)*HZ/1000>0)?((timeout_ms)*HZ/1000):1)
+#define rtw_usb_bulk_msg(usb_dev, pipe, data, len, actual_length, timeout_ms) \
 	usb_bulk_msg((usb_dev), (pipe), (data), (len), (actual_length), \
-		     ((timeout_ms) == 0) || ((timeout_ms)*HZ/1000 > 0) ?\
-		     ((timeout_ms)*HZ/1000) : 1)
+		((timeout_ms) == 0) ||((timeout_ms)*HZ/1000>0)?((timeout_ms)*HZ/1000):1)
 #endif
 #include <usb_ops_linux.h>
 
@@ -67,48 +58,18 @@ void rtl8188eu_set_hw_type(struct adapter *padapter);
 void rtl8188eu_set_intf_ops(struct _io_ops *pops);
 #define usb_set_intf_ops rtl8188eu_set_intf_ops
 
-/*
- * Increase and check if the continual_urb_error of this @param dvobjprivei
- * is larger than MAX_CONTINUAL_URB_ERR
- * @return true:
- * @return false:
- */
-static inline int rtw_inc_and_chk_continual_urb_error(struct dvobj_priv *dvobj)
-{
-	int ret = false;
-	int value;
-	value = ATOMIC_INC_RETURN(&dvobj->continual_urb_error);
-	if (value > MAX_CONTINUAL_URB_ERR) {
-		DBG_88E("[dvobj:%p][ERROR] continual_urb_error:%d > %d\n",
-			dvobj, value, MAX_CONTINUAL_URB_ERR);
-		ret = true;
-	}
-	return ret;
-}
-
-/*
-* Set the continual_urb_error of this @param dvobjprive to 0
-*/
-static inline void rtw_reset_continual_urb_error(struct dvobj_priv *dvobj)
-{
-	ATOMIC_SET(&dvobj->continual_urb_error, 0);
-}
-
 #define USB_HIGH_SPEED_BULK_SIZE	512
 #define USB_FULL_SPEED_BULK_SIZE	64
 
-static inline u8 rtw_usb_bulk_size_boundary(struct adapter *padapter,
-					    int buf_len)
+static inline u8 rtw_usb_bulk_size_boundary(struct adapter * padapter,int buf_len)
 {
 	u8 rst = true;
-	struct dvobj_priv *pdvobjpriv = adapter_to_dvobj(padapter);
+	struct dvobj_priv	*pdvobjpriv = adapter_to_dvobj(padapter);
 
-	if (pdvobjpriv->ishighspeed)
-		rst = (0 == (buf_len) % USB_HIGH_SPEED_BULK_SIZE) ?
-		      true : false;
+	if (pdvobjpriv->ishighspeed == true)
+		rst = (0 == (buf_len) % USB_HIGH_SPEED_BULK_SIZE)?true:false;
 	else
-		rst = (0 == (buf_len) % USB_FULL_SPEED_BULK_SIZE) ?
-		      true : false;
+		rst = (0 == (buf_len) % USB_FULL_SPEED_BULK_SIZE)?true:false;
 	return rst;
 }
 

@@ -10,6 +10,8 @@ the kernel for which the headers have been installed. The necessary steps are
 dependent on which distro you are using. Creating a new issue and asking at
 GitHub will not be productive.
 
+Your kernel configuration MUST have CONFIG_WIRELESS_EXT set.
+
 Unsolicited E-mail sent to my private address will be ignored!!
 
 If a build fails that previously worked, perform a 'git pull' and retry before
@@ -36,6 +38,14 @@ consult your distro.
 
 > sudo make install
 
+DKMS
+---------
+The module can also be installed with DKMS. Make sure to install the `dkms` package first.
+
+    sudo dkms add ./rtl8188eu
+    sudo dkms build 8188eu/1.0
+    sudo dkms install 8188eu/1.0
+
 Submitting Issues
 ---------
 
@@ -45,12 +55,3 @@ Frequently asked Questions
 ### The network manager says: "Device is not ready"!
 Make sure you copied the firmware (rtl8188eufw.bin) to /lib/firmware/rtlwifi/
 
-### NetworkManager does not list SSID
-NetworkManager changes the Wi-Fi MAC address during scanning to improve privacy but this adapter does not support it. To adress this issue, please create `/etc/NetworkManager/conf.d/80-wifi.conf` with content:
-
-```
-[device]
-wifi.scan-rand-mac-address=no
-```
-
-and run `systemctl restart NetworkManager`

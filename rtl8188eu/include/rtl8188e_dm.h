@@ -19,7 +19,7 @@
  ******************************************************************************/
 #ifndef __RTL8188E_DM_H__
 #define __RTL8188E_DM_H__
-enum{
+enum {
 	UP_LINK,
 	DOWN_LINK,
 };
@@ -29,7 +29,8 @@ enum{
 #define IQK_BB_REG_NUM			9
 #define HP_THERMAL_NUM		8
 /*  duplicate code,will move to ODM ######### */
-struct	dm_priv {
+struct	dm_priv
+{
 	u8	DM_Type;
 	u8	DMFlag;
 	u8	InitDMFlag;
@@ -43,20 +44,22 @@ struct	dm_priv {
 	int	MinUndecoratedPWDBForDM;
 	int	LastMinUndecoratedPWDBForDM;
 
+/*  duplicate code,will move to ODM ######### */
 	/* for High Power */
 	u8 bDynamicTxPowerEnable;
 	u8 LastDTPLvl;
-	u8 DynamicTxHighPowerLvl;/* Tx Power Control for Near/Far Range */
+	u8 DynamicTxHighPowerLvl;/* Add by Jacken Tx Power Control for Near/Far Range 2008/03/06 */
 	u8	PowerIndex_backup[6];
+	u8	TxPowerTrackControl;	/* for mp mode, turn off txpwrtracking as default */
 };
 
-void rtl8188e_init_dm_priv(struct adapter *adapt);
-void rtl8188e_deinit_dm_priv(struct adapter *adapt);
-void rtl8188e_InitHalDm(struct adapter *adapt);
-void rtl8188e_HalDmWatchDog(struct adapter *adapt);
 
-void AntDivCompare8188E(struct adapter *adapt, struct wlan_bssid_ex *dst,
-			struct wlan_bssid_ex *src);
-u8 AntDivBeforeLink8188E(struct adapter *adapt);
+void rtl8188e_init_dm_priv(struct adapter *Adapter);
+void rtl8188e_deinit_dm_priv(struct adapter *Adapter);
+void rtl8188e_InitHalDm(struct adapter *Adapter);
+void rtl8188e_HalDmWatchDog(struct adapter *Adapter);
+
+void	AntDivCompare8188E(struct adapter *Adapter, struct wlan_bssid_ex *dst, struct wlan_bssid_ex *src);
+u8 AntDivBeforeLink8188E(struct adapter *Adapter );
 
 #endif

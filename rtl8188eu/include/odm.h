@@ -363,7 +363,7 @@ enum odm_common_info_def {
 	ODM_CMNINFO_IC_TYPE,		/* ODM_IC_TYPE_E */
 	ODM_CMNINFO_CUT_VER,		/* ODM_CUT_VERSION_E */
 	ODM_CMNINFO_FAB_VER,		/* ODM_FAB_E */
-	ODM_CMNINFO_RF_TYPE,		/* RF_PATH_E or ODM_RF_TYPE_E? */
+	ODM_CMNINFO_RF_TYPE,		/* ODM_RF_PATH_E or ODM_RF_TYPE_E? */
 	ODM_CMNINFO_BOARD_TYPE,		/* ODM_BOARD_TYPE_E */
 	ODM_CMNINFO_EXT_LNA,		/* true */
 	ODM_CMNINFO_EXT_PA,
@@ -452,7 +452,7 @@ enum odm_ability_def {
 	ODM_RF_CALIBRATION		= BIT26,
 };
 
-/* 	ODM_CMNINFO_INTERFACE */
+/*	ODM_CMNINFO_INTERFACE */
 enum odm_interface_def {
 	ODM_ITRF_PCIE	=	0x1,
 	ODM_ITRF_USB	=	0x2,
@@ -578,7 +578,7 @@ enum odm_security {
 	ODM_SEC_RESERVE		= 3,
 	ODM_SEC_AESCCMP		= 4,
 	ODM_SEC_WEP104		= 5,
-	ODM_WEP_WPA_MIXED   	= 6, /*  WEP + WPA */
+	ODM_WEP_WPA_MIXED	= 6, /*  WEP + WPA */
 	ODM_SEC_SMS4		= 7,
 };
 
@@ -758,7 +758,7 @@ enum ant_div_type {
 
 /* Copy from SD4 defined structure. We use to support PHY DM integration. */
 struct odm_dm_struct {
-	/* 	Add for different team use temporarily */
+	/*	Add for different team use temporarily */
 	struct adapter *Adapter;	/*  For CE/NIC team */
 	struct rtl8192cd_priv *priv;	/*  For AP/ADSL team */
 	/*  WHen you use above pointers, they must be initialized. */

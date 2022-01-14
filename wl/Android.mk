@@ -9,37 +9,5 @@
 #
 
 LOCAL_PATH := $(my-dir)
-CUR_LOCAL_PATH := $(call my-dir)
 LOCAL_MODULE := $(notdir $(LOCAL_PATH))
 EXTRA_KERNEL_MODULE_PATH_$(LOCAL_MODULE) := $(LOCAL_PATH)
-
-# parts of build/tasks/kernel.mk
-
-TARGET_KERNEL_ARCH ?= $(TARGET_ARCH)
-WL_PATH := $(TARGET_OUT_INTERMEDIATES)/kmodule/wl
-WL_SRC := $(WL_PATH)/hybrid-v35$(if $(filter x86,$(TARGET_KERNEL_ARCH)),,_64)-nodebug-pcoem-6_30_223_271.tar.gz
-WL_LIB := $(WL_PATH)/lib$(if $(filter x86,$(TARGET_KERNEL_ARCH)),32,64)
-
-WL_PATCHES := \
-	wl.patch \
-	002-rdtscl.patch \
-	003-linux47.patch \
-	004-linux48.patch \
-	005-debian-fix-kernel-warnings.patch \
-	006-linux411.patch \
-	007-linux412.patch \
-	008-linux415.patch \
-	009-fix_mac_profile_discrepancy.patch \
-	010-linux510.patch \
-	011-linux560.patch \
-
-$(WL_SRC):
-	@echo Downloading $(@F)...
-	$(hide) mkdir -p $(@D) && cp $(CUR_LOCAL_PATH)/$(@F) $@
-
-$(WL_LIB): $(WL_SRC) $(addprefix $(LOCAL_PATH)/,$(WL_PATCHES))
-	$(hide) tar zxf $< -C $(@D) --overwrite -m && \
-		rm -rf $@ && mv $(@D)/lib $@ && touch $@ && \
-		cat $(filter %.patch,$^) | patch -p1 -d $(@D)
-
-$(WL_PATH): $(WL_LIB)

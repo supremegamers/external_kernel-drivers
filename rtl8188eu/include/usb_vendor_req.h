@@ -33,19 +33,27 @@
 #define	RT_USB_SYSCLK_40MHZ		1
 #define	RT_USB_SYSCLK_60MHZ		2
 
-enum bt_usb_request {
+
+typedef enum _RT_USB_BREQUEST {
 	RT_USB_SET_REGISTER		= 1,
 	RT_USB_SET_SYSCLK		= 2,
 	RT_USB_GET_SYSCLK		= 3,
 	RT_USB_GET_REGISTER		= 4
-};
+} RT_USB_BREQUEST;
 
-enum rt_usb_wvalue {
+
+typedef enum _RT_USB_WVALUE {
 	RT_USB_RESET_MASK	=	1,
 	RT_USB_SLEEP_MASK	=	2,
 	RT_USB_USB_HRCPWM	=	3,
 	RT_USB_LDO			=	4,
 	RT_USB_BOOT_TYPE	=	5
-};
+} RT_USB_WVALUE;
+
+
+/* bool usbvendorrequest(PCE_USB_DEVICE	CEdevice, RT_USB_BREQUEST bRequest, RT_USB_WVALUE wValue, u8 wIndex, void * Data, u8 DataLength, bool isDirectionIn); */
+/* bool CEusbGetStatusRequest(PCE_USB_DEVICE CEdevice, IN u16 Op, IN u16 Index, void * Data); */
+/* bool CEusbFeatureRequest(PCE_USB_DEVICE CEdevice, IN u16 Op, IN u16 FeatureSelector, IN u16 Index); */
+/* bool CEusbGetDescriptorRequest(PCE_USB_DEVICE CEdevice, IN short urbLength, IN u8 DescriptorType, IN u8 Index, IN u16 LanguageId, IN void *  TransferBuffer, IN u32 TransferBufferLength); */
 
 #endif

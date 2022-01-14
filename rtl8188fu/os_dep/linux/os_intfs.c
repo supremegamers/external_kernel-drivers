@@ -54,7 +54,7 @@ int rtw_adhoc_tx_pwr = 1;
 int rtw_soft_ap = 0;
 //int smart_ps = 1;
 #ifdef CONFIG_POWER_SAVING
-int rtw_power_mgnt = PS_MODE_MAX;
+int rtw_power_mgnt = 0;
 #ifdef CONFIG_IPS_LEVEL_2
 int rtw_ips_mode = IPS_LEVEL_2;
 #else
@@ -193,7 +193,7 @@ int rtw_antdiv_type = 0 ; //0:decide by efuse  1: for 88EE, 1Tx and 1RxCG are di
 int rtw_switch_usb3 = _FALSE; /* _FALSE: doesn't switch, _TRUE: switch from usb2.0 to usb 3.0 */
 
 #ifdef CONFIG_USB_AUTOSUSPEND
-int rtw_enusbss = 1;//0:disable,1:enable
+int rtw_enusbss = 0;//0:disable,1:enable
 #else
 int rtw_enusbss = 0;//0:disable,1:enable
 #endif
@@ -3143,7 +3143,9 @@ static int route_dump(u32 *gw_addr ,int* gw_index)
 	struct msghdr msg;
 	struct iovec iov;
 	struct sockaddr_nl nladdr;
+#ifdef set_fs
 	mm_segment_t oldfs;
+#endif
 	char *pg;
 	int size = 0;
 
@@ -3183,13 +3185,18 @@ static int route_dump(u32 *gw_addr ,int* gw_index)
 	msg.msg_controllen = 0;
 	msg.msg_flags = MSG_DONTWAIT;
 
-	oldfs = get_fs(); set_fs(KERNEL_DS);
+#ifdef set_fs
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+#endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
 	err = sock_sendmsg(sock, &msg);
 #else
 	err = sock_sendmsg(sock, &msg, sizeof(req));
 #endif
+#ifdef set_fs
 	set_fs(oldfs);
+#endif
 
 	if (err < 0)
 		goto out_sock;
@@ -3215,9 +3222,14 @@ restart:
 		iov_iter_init(&msg.msg_iter, READ, &iov, 1, PAGE_SIZE);
 #endif
 
-		oldfs = get_fs(); set_fs(KERNEL_DS);
+#ifdef set_fs
+		oldfs = get_fs();
+		set_fs(KERNEL_DS);
+#endif
 		err = sock_recvmsg(sock, &msg, PAGE_SIZE, MSG_DONTWAIT);
+#ifdef set_fs
 		set_fs(oldfs);
+#endif
 
 		if (err < 0)
 			goto out_sock_pg;
@@ -3293,13 +3305,18 @@ done:
 		msg.msg_controllen = 0;
 		msg.msg_flags=MSG_DONTWAIT;
 
-		oldfs = get_fs(); set_fs(KERNEL_DS);
+#ifdef set_fs
+		oldfs = get_fs();
+		set_fs(KERNEL_DS);
+#endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
 		err = sock_sendmsg(sock, &msg);
 #else
 		err = sock_sendmsg(sock, &msg, sizeof(req));
 #endif
+#ifdef set_fs
 		set_fs(oldfs);
+#endif
 
 		if (err > 0)
 			goto restart;

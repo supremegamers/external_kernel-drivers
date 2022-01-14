@@ -19,14 +19,30 @@
  ******************************************************************************/
 #define _RTL8188E_REDESC_C_
 
+#include <drv_conf.h>
 #include <osdep_service.h>
 #include <drv_types.h>
 #include <rtl8188e_hal.h>
 
-static void process_rssi(struct adapter *padapter, struct recv_frame *prframe)
+static s32  translate2dbm(u8 signal_strength_idx)
 {
-	struct rx_pkt_attrib *pattrib = &prframe->attrib;
-	struct signal_stat *signal_stat = &padapter->recvpriv.signal_strength_data;
+	s32	signal_power; /*  in dBm. */
+
+
+	/*  Translate to dBm (x=0.5y-95). */
+	signal_power = (s32)((signal_strength_idx + 1) >> 1);
+	signal_power -= 95;
+
+	return signal_power;
+}
+
+
+static void process_rssi(struct adapter *padapter,union recv_frame *prframe)
+{
+	u32	last_rssi, tmp_val;
+	struct rx_pkt_attrib *pattrib = &prframe->u.hdr.attrib;
+	struct signal_stat * signal_stat = &padapter->recvpriv.signal_strength_data;
+
 
 	if (signal_stat->update_req) {
 		signal_stat->total_num = 0;
@@ -37,17 +53,19 @@ static void process_rssi(struct adapter *padapter, struct recv_frame *prframe)
 	signal_stat->total_num++;
 	signal_stat->total_val  += pattrib->phy_info.SignalStrength;
 	signal_stat->avg_val = signal_stat->total_val / signal_stat->total_num;
-} /*  Process_UI_RSSI_8192C */
+}/*  Process_UI_RSSI_8192C */
 
-static void process_link_qual(struct adapter *padapter, struct recv_frame *prframe)
+static void process_link_qual(struct adapter *padapter,union recv_frame *prframe)
 {
+	u32	last_evm=0, tmpVal;
 	struct rx_pkt_attrib *pattrib;
-	struct signal_stat *signal_stat;
+	struct signal_stat * signal_stat;
 
-	if (prframe == NULL || padapter == NULL)
+	if (prframe == NULL || padapter== NULL) {
 		return;
+	}
 
-	pattrib = &prframe->attrib;
+	pattrib = &prframe->u.hdr.attrib;
 	signal_stat = &padapter->recvpriv.signal_qual_data;
 
 	if (signal_stat->update_req) {
@@ -61,20 +79,39 @@ static void process_link_qual(struct adapter *padapter, struct recv_frame *prfra
 	signal_stat->avg_val = signal_stat->total_val / signal_stat->total_num;
 }
 
+/* void rtl8188e_process_phy_info(struct adapter *padapter, union recv_frame *prframe) */
 void rtl8188e_process_phy_info(struct adapter *padapter, void *prframe)
 {
-	struct recv_frame *precvframe = (struct recv_frame *)prframe;
+	union recv_frame *precvframe = (union recv_frame *)prframe;
 
+	/*  */
 	/*  Check RSSI */
+	/*  */
 	process_rssi(padapter, precvframe);
+	/*  */
+	/*  Check PWDB. */
+	/*  */
+	/* process_PWDB(padapter, precvframe); */
+
+	/* UpdateRxSignalStatistics8192C(Adapter, pRfd); */
+	/*  */
 	/*  Check EVM */
+	/*  */
 	process_link_qual(padapter,  precvframe);
+
 }
 
-void update_recvframe_attrib_88e(struct recv_frame *precvframe, struct recv_stat *prxstat)
+
+void update_recvframe_attrib_88e(
+	union recv_frame *precvframe,
+	struct recv_stat *prxstat)
 {
 	struct rx_pkt_attrib	*pattrib;
 	struct recv_stat	report;
+	PRXREPORT		prxreport;
+	/* struct recv_frame_hdr	*phdr; */
+
+	/* phdr = &precvframe->u.hdr; */
 
 	report.rxdw0 = prxstat->rxdw0;
 	report.rxdw1 = prxstat->rxdw1;
@@ -83,7 +120,9 @@ void update_recvframe_attrib_88e(struct recv_frame *precvframe, struct recv_stat
 	report.rxdw4 = prxstat->rxdw4;
 	report.rxdw5 = prxstat->rxdw5;
 
-	pattrib = &precvframe->attrib;
+	prxreport = (PRXREPORT)&report;
+
+	pattrib = &precvframe->u.hdr.attrib;
 	memset(pattrib, 0, sizeof(struct rx_pkt_attrib));
 
 	pattrib->crc_err = (u8)((le32_to_cpu(report.rxdw0) >> 14) & 0x1);;/* u8)prxreport->crc32; */
@@ -91,13 +130,14 @@ void update_recvframe_attrib_88e(struct recv_frame *precvframe, struct recv_stat
 	/*  update rx report to recv_frame attribute */
 	pattrib->pkt_rpt_type = (u8)((le32_to_cpu(report.rxdw3) >> 14) & 0x3);/* prxreport->rpt_sel; */
 
-	if (pattrib->pkt_rpt_type == NORMAL_RX) { /* Normal rx packet */
-		pattrib->pkt_len = (u16)(le32_to_cpu(report.rxdw0) & 0x00003fff);/* u16)prxreport->pktlen; */
+	if (pattrib->pkt_rpt_type == NORMAL_RX)/* Normal rx packet */
+	{
+		pattrib->pkt_len = (u16)(le32_to_cpu(report.rxdw0) &0x00003fff);/* u16)prxreport->pktlen; */
 		pattrib->drvinfo_sz = (u8)((le32_to_cpu(report.rxdw0) >> 16) & 0xf) * 8;/* u8)(prxreport->drvinfosize << 3); */
 
 		pattrib->physt =  (u8)((le32_to_cpu(report.rxdw0) >> 26) & 0x1);/* u8)prxreport->physt; */
 
-		pattrib->bdecrypted = (le32_to_cpu(report.rxdw0) & BIT(27)) ? 0 : 1;/* u8)(prxreport->swdec ? 0 : 1); */
+		pattrib->bdecrypted = (le32_to_cpu(report.rxdw0) & BIT(27))? 0:1;/* u8)(prxreport->swdec ? 0 : 1); */
 		pattrib->encrypt = (u8)((le32_to_cpu(report.rxdw0) >> 20) & 0x7);/* u8)prxreport->security; */
 
 		pattrib->qos = (u8)((le32_to_cpu(report.rxdw0) >> 23) & 0x1);/* u8)prxreport->qos; */
@@ -115,11 +155,12 @@ void update_recvframe_attrib_88e(struct recv_frame *precvframe, struct recv_stat
 
 		pattrib->icv_err = (u8)((le32_to_cpu(report.rxdw0) >> 15) & 0x1);/* u8)prxreport->icverr; */
 		pattrib->shift_sz = (u8)((le32_to_cpu(report.rxdw0) >> 24) & 0x3);
-	} else if (pattrib->pkt_rpt_type == TX_REPORT1) { /* CCX */
+
+	} else if (pattrib->pkt_rpt_type == TX_REPORT1) {/* CCX */
 		pattrib->pkt_len = TX_RPT1_PKT_LEN;
 		pattrib->drvinfo_sz = 0;
 	} else if (pattrib->pkt_rpt_type == TX_REPORT2) { /*  TX RPT */
-		pattrib->pkt_len = (u16)(le32_to_cpu(report.rxdw0) & 0x3FF);/* Rx length[9:0] */
+		pattrib->pkt_len =(u16)(le32_to_cpu(report.rxdw0) & 0x3FF);/* Rx length[9:0] */
 		pattrib->drvinfo_sz = 0;
 
 		/*  */
@@ -128,29 +169,35 @@ void update_recvframe_attrib_88e(struct recv_frame *precvframe, struct recv_stat
 		pattrib->MacIDValidEntry[0] = le32_to_cpu(report.rxdw4);
 		pattrib->MacIDValidEntry[1] = le32_to_cpu(report.rxdw5);
 
-	} else if (pattrib->pkt_rpt_type == HIS_REPORT) { /*  USB HISR RPT */
-		pattrib->pkt_len = (u16)(le32_to_cpu(report.rxdw0) & 0x00003fff);/* u16)prxreport->pktlen; */
 	}
+	else if (pattrib->pkt_rpt_type == HIS_REPORT)/*  USB HISR RPT */
+	{
+		pattrib->pkt_len = (u16)(le32_to_cpu(report.rxdw0) &0x00003fff);/* u16)prxreport->pktlen; */
+	}
+
 }
 
 /*
  * Notice:
  *	Before calling this function,
- *	precvframe->rx_data should be ready!
+ *	precvframe->u.hdr.rx_data should be ready!
  */
-void update_recvframe_phyinfo_88e(struct recv_frame *precvframe, struct phy_stat *pphy_status)
+void update_recvframe_phyinfo_88e(
+	union recv_frame	*precvframe,
+	struct phy_stat *pphy_status)
 {
-	struct adapter *padapter = precvframe->adapter;
-	struct rx_pkt_attrib *pattrib = &precvframe->attrib;
-	struct hal_data_8188e *pHalData = GET_HAL_DATA(padapter);
-	struct odm_phy_status_info *pPHYInfo  = (struct odm_phy_status_info *)(&pattrib->phy_info);
-	u8 *wlanhdr;
-	struct odm_per_pkt_info	pkt_info;
-	u8 *sa = NULL;
+	struct adapter *			padapter = precvframe->u.hdr.adapter;
+	struct rx_pkt_attrib	*pattrib = &precvframe->u.hdr.attrib;
+	HAL_DATA_TYPE		*pHalData = GET_HAL_DATA(padapter);
+	PODM_PHY_INFO_T		pPHYInfo  = (PODM_PHY_INFO_T)(&pattrib->phy_info);
+	u8					*wlanhdr;
+	ODM_PACKET_INFO_T	pkt_info;
+	u8 *sa;
 	struct sta_priv *pstapriv;
 	struct sta_info *psta;
+	/* _irqL		irqL; */
 
-	pkt_info.bPacketMatchBSSID = false;
+	pkt_info.bPacketMatchBSSID =false;
 	pkt_info.bPacketToSelf = false;
 	pkt_info.bPacketBeacon = false;
 
@@ -158,20 +205,18 @@ void update_recvframe_phyinfo_88e(struct recv_frame *precvframe, struct phy_stat
 
 	pkt_info.bPacketMatchBSSID = ((!IsFrameTypeCtrl(wlanhdr)) &&
 		!pattrib->icv_err && !pattrib->crc_err &&
-		!memcmp(get_hdr_bssid(wlanhdr),
-		 get_bssid(&padapter->mlmepriv), ETH_ALEN));
+		_rtw_memcmp(get_hdr_bssid(wlanhdr), get_bssid(&padapter->mlmepriv), ETH_ALEN));
 
-	pkt_info.bPacketToSelf = pkt_info.bPacketMatchBSSID &&
-				 (!memcmp(get_da(wlanhdr),
-				  myid(&padapter->eeprompriv), ETH_ALEN));
+	pkt_info.bPacketToSelf = pkt_info.bPacketMatchBSSID && (_rtw_memcmp(get_da(wlanhdr), myid(&padapter->eeprompriv), ETH_ALEN));
 
-	pkt_info.bPacketBeacon = pkt_info.bPacketMatchBSSID &&
-				 (GetFrameSubType(wlanhdr) == WIFI_BEACON);
+	pkt_info.bPacketBeacon = pkt_info.bPacketMatchBSSID && (GetFrameSubType(wlanhdr) == WIFI_BEACON);
 
 	if (pkt_info.bPacketBeacon) {
-		if (check_fwstate(&padapter->mlmepriv, WIFI_STATION_STATE))
+		if (check_fwstate(&padapter->mlmepriv, WIFI_STATION_STATE) == true) {
 			sa = padapter->mlmepriv.cur_network.network.MacAddress;
-		/* to do Ad-hoc */
+		}
+		else
+			sa = get_sa(wlanhdr);
 	} else {
 		sa = get_sa(wlanhdr);
 	}
@@ -183,19 +228,27 @@ void update_recvframe_phyinfo_88e(struct recv_frame *precvframe, struct phy_stat
 		pkt_info.StationID = psta->mac_id;
 	pkt_info.Rate = pattrib->mcs_rate;
 
-	ODM_PhyStatusQuery(&pHalData->odmpriv, pPHYInfo, (u8 *)pphy_status, &(pkt_info), padapter);
+	ODM_PhyStatusQuery(&pHalData->odmpriv,pPHYInfo,(u8 *)pphy_status,&pkt_info);
 
-	precvframe->psta = NULL;
+	precvframe->u.hdr.psta = NULL;
 	if (pkt_info.bPacketMatchBSSID &&
-	    (check_fwstate(&padapter->mlmepriv, WIFI_AP_STATE))) {
-		if (psta) {
-			precvframe->psta = psta;
+		(check_fwstate(&padapter->mlmepriv, WIFI_AP_STATE) == true))
+	{
+		if (psta)
+		{
+			precvframe->u.hdr.psta = psta;
 			rtl8188e_process_phy_info(padapter, precvframe);
+
 		}
-	} else if (pkt_info.bPacketToSelf || pkt_info.bPacketBeacon) {
-		if (check_fwstate(&padapter->mlmepriv, WIFI_ADHOC_STATE|WIFI_ADHOC_MASTER_STATE)) {
+	}
+	else if (pkt_info.bPacketToSelf || pkt_info.bPacketBeacon)
+	{
+		if (check_fwstate(&padapter->mlmepriv, WIFI_ADHOC_STATE|WIFI_ADHOC_MASTER_STATE) == true)
+		{
 			if (psta)
-				precvframe->psta = psta;
+			{
+				precvframe->u.hdr.psta = psta;
+			}
 		}
 		rtl8188e_process_phy_info(padapter, precvframe);
 	}

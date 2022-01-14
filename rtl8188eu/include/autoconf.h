@@ -18,7 +18,6 @@
  *
  ******************************************************************************/
 
-/*  temporarily flag ******* */
 /*
  * Public  General Config
  */
@@ -35,9 +34,34 @@
 
 #define RTW_NOTCH_FILTER 0 /* 0:Disable, 1:Enable, */
 
+#define CONFIG_BR_EXT		/*  Enable NAT2.5 support for STA mode interface with a L2 Bridge */
+#ifdef CONFIG_BR_EXT
 #define CONFIG_BR_EXT_BRNAME	"br0"
+#endif	/*  CONFIG_BR_EXT */
+
+/*
+ * HAL  Related Config
+ */
+
+#define CONFIG_OUT_EP_WIFI_MODE	0
+
+#define DISABLE_BB_RF	0
+
+#define MP_DRIVER 0
+
+
+/*
+ * Outsource  Related Config
+ */
+
+#define RATE_ADAPTIVE_SUPPORT			1
+#define POWER_TRAINING_ACTIVE			1
+
+#define CONFIG_80211D
 
 /*
  * Debug Related Config
  */
 #define DBG	1
+
+#define CONFIG_PROC_DEBUG

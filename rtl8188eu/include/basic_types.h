@@ -20,22 +20,33 @@
 #ifndef __BASIC_TYPES_H__
 #define __BASIC_TYPES_H__
 
+#include <drv_conf.h>
+
+
 #define SUCCESS	0
 #define FAIL	(-1)
 
-#include <linux/types.h>
-#define NDIS_OID uint
+	#include <linux/types.h>
+	#define NDIS_OID uint
+	#define NDIS_STATUS uint
 
-typedef void (*proc_t)(void *);
+	typedef	signed int sint;
 
-#define FIELD_OFFSET(s, field)	((ssize_t)&((s *)(0))->field)
+	typedef void (*proc_t)(void*);
 
-#define MEM_ALIGNMENT_OFFSET	(sizeof(size_t))
-#define MEM_ALIGNMENT_PADDING	(sizeof(size_t) - 1)
+	typedef		__kernel_size_t	SIZE_T;
+	typedef	__kernel_ssize_t	SSIZE_T;
+	#define FIELD_OFFSET(s,field)	((SSIZE_T)&((s*)(0))->field)
 
-/* port from fw */
-/*  TODO: Macros Below are Sync from SD7-Driver. It is necessary
- * to check correctness */
+
+#define MEM_ALIGNMENT_OFFSET	(sizeof (SIZE_T))
+#define MEM_ALIGNMENT_PADDING	(sizeof(SIZE_T) - 1)
+
+#define SIZE_PTR SIZE_T
+#define SSIZE_PTR SSIZE_T
+
+/* port from fw by thomas */
+/*  TODO: Belows are Sync from SD7-Driver. It is necessary to check correctness */
 
 /*
  *	Call endian free function when
@@ -178,7 +189,6 @@ value to host byte ordering.*/
 		)
 
 /*  Get the N-bytes aligment offset from the current length */
-#define	N_BYTE_ALIGMENT(__value, __aligment) ((__aligment == 1) ? \
-	(__value) : (((__value + __aligment - 1) / __aligment) * __aligment))
+#define N_BYTE_ALIGMENT(__Value, __Aligment) ((__Aligment == 1) ? (__Value) : (((__Value + __Aligment - 1) / __Aligment) * __Aligment))
 
 #endif /* __BASIC_TYPES_H__ */

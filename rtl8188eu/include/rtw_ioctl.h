@@ -20,16 +20,19 @@
 #ifndef _RTW_IOCTL_H_
 #define _RTW_IOCTL_H_
 
+#include <drv_conf.h>
 #include <osdep_service.h>
 #include <drv_types.h>
 
+
 #ifndef OID_802_11_CAPABILITY
-	#define OID_802_11_CAPABILITY	0x0d010122
+	#define OID_802_11_CAPABILITY                   0x0d010122
 #endif
 
 #ifndef OID_802_11_PMKID
-	#define OID_802_11_PMKID	0x0d010123
+	#define OID_802_11_PMKID                        0x0d010123
 #endif
+
 
 /*  For DDK-defined OIDs */
 #define OID_NDIS_SEG1	0x00010100
@@ -43,16 +46,16 @@
 #define OID_NDIS_SEG9	0x0D010200
 #define OID_NDIS_SEG10	0x0D020200
 
-#define SZ_OID_NDIS_SEG1	23
-#define SZ_OID_NDIS_SEG2	3
-#define SZ_OID_NDIS_SEG3	6
-#define SZ_OID_NDIS_SEG4	6
-#define SZ_OID_NDIS_SEG5	4
-#define SZ_OID_NDIS_SEG6	8
-#define SZ_OID_NDIS_SEG7	7
-#define SZ_OID_NDIS_SEG8	36
-#define SZ_OID_NDIS_SEG9	24
-#define SZ_OID_NDIS_SEG10	19
+#define SZ_OID_NDIS_SEG1		  23
+#define SZ_OID_NDIS_SEG2		    3
+#define SZ_OID_NDIS_SEG3		    6
+#define SZ_OID_NDIS_SEG4		    6
+#define SZ_OID_NDIS_SEG5		    4
+#define SZ_OID_NDIS_SEG6		    8
+#define SZ_OID_NDIS_SEG7		    7
+#define SZ_OID_NDIS_SEG8		  36
+#define SZ_OID_NDIS_SEG9		  24
+#define SZ_OID_NDIS_SEG10		  19
 
 /*  For Realtek-defined OIDs */
 #define OID_MP_SEG1		0xFF871100
@@ -61,13 +64,15 @@
 #define OID_MP_SEG3		0xFF818700
 #define OID_MP_SEG4		0xFF011100
 
-#define DEBUG_OID(dbg, str)						\
-	if ((!dbg)) {							\
-		RT_TRACE(_module_rtl871x_ioctl_c_, _drv_info_,		\
-			 ("%s(%d): %s", __func__, __line__, str));	\
+#define DEBUG_OID(dbg, str)			\
+       if ((!dbg))							\
+	{								\
+	   RT_TRACE(_module_rtl871x_ioctl_c_,_drv_info_,("%s(%d): %s", __FUNCTION__, __LINE__, str));	\
 	}
 
-enum oid_type {
+
+enum oid_type
+{
 	QUERY_OID,
 	SET_OID
 };
@@ -81,7 +86,8 @@ struct oid_funs_node {
 	int set_counter; /* count the number of set hits for this segment */
 };
 
-struct oid_par_priv {
+struct oid_par_priv
+{
 	void		*adapter_context;
 	NDIS_OID	oid;
 	void		*information_buf;
@@ -93,28 +99,30 @@ struct oid_par_priv {
 };
 
 struct oid_obj_priv {
-	unsigned char	dbg; /*  0: without OID debug message
-			      *  1: with OID debug message */
-	int (*oidfuns)(struct oid_par_priv *poid_par_priv);
+	unsigned char	dbg; /*  0: without OID debug message  1: with OID debug message */
+	NDIS_STATUS (*oidfuns)(struct oid_par_priv *poid_par_priv);
 };
 
-#if defined(_RTW_MP_IOCTL_C_)
-static int oid_null_function(struct oid_par_priv *poid_par_priv) {
-	return NDIS_STATUS_SUCCESS;
-}
+#if defined(CONFIG_WIRELESS_EXT)
+extern struct iw_handler_def  rtw_handlers_def;
 #endif
 
-extern struct iw_handler_def  rtw_handlers_def;
+extern	NDIS_STATUS drv_query_info(
+	struct  net_device *		MiniportAdapterContext,
+	NDIS_OID		Oid,
+	void *			InformationBuffer,
+	u32			InformationBufferLength,
+	u32*			BytesWritten,
+	u32*			BytesNeeded
+	);
 
-int drv_query_info(struct  net_device *miniportadaptercontext, NDIS_OID oid,
-		   void *informationbuffer, u32 informationbufferlength,
-		   u32 *byteswritten, u32 *bytesneeded);
-
-int drv_set_info(struct  net_device *MiniportAdapterContext,
-		 NDIS_OID oid, void *informationbuffer,
-		 u32 informationbufferlength, u32 *bytesread,
-		 u32 *bytesneeded);
-
-extern int ui_pid[3];
+extern	NDIS_STATUS	drv_set_info(
+	struct  net_device *		MiniportAdapterContext,
+	NDIS_OID		Oid,
+	void *			InformationBuffer,
+	u32			InformationBufferLength,
+	u32*			BytesRead,
+	u32*			BytesNeeded
+	);
 
 #endif /*  #ifndef __INC_CEINFO_ */

@@ -31,9 +31,9 @@
 /*  For Production Kit with Agilent Equipments */
 /*  in order to make our custom oids hopefully somewhat unique */
 /*  we will use 0xFF (indicating implementation specific OID) */
-/*	81(first byte of non zero Realtek unique identifier) */
-/*	80 (second byte of non zero Realtek unique identifier) */
-/*	XX (the custom OID number - providing 255 possible custom oids) */
+/*                81(first byte of non zero Realtek unique identifier) */
+/*                80 (second byte of non zero Realtek unique identifier) */
+/*                XX (the custom OID number - providing 255 possible custom oids) */
 
 #define OID_RT_PRO_RESET_DUT				0xFF818000
 #define OID_RT_PRO_SET_DATA_RATE			0xFF818001
@@ -96,15 +96,15 @@
 #define OID_RT_PRO_SET_SINGLE_TONE_TX			0xFF818043
 /*  */
 
+
 /*  by Owen for RTL8185 Phy Status Report Utility */
-#define OID_RT_UTILITY_false_ALARM_COUNTERS		0xFF818580
-#define OID_RT_UTILITY_SELECT_DEBUG_MODE		0xFF818581
-#define OID_RT_UTILITY_SELECT_SUBCARRIER_NUMBER		0xFF818582
-#define OID_RT_UTILITY_GET_RSSI_STATUS			0xFF818583
-#define OID_RT_UTILITY_GET_FRAME_DETECTION_STATUS	0xFF818584
-#define OID_RT_UTILITY_GET_AGC_AND_FREQUENCY_OFFSET_ESTIMATION_STATUS	\
-							0xFF818585
-#define OID_RT_UTILITY_GET_CHANNEL_ESTIMATION_STATUS	0xFF818586
+#define OID_RT_UTILITYfalse_ALARM_COUNTERS				0xFF818580
+#define OID_RT_UTILITY_SELECT_DEBUG_MODE				0xFF818581
+#define OID_RT_UTILITY_SELECT_SUBCARRIER_NUMBER				0xFF818582
+#define OID_RT_UTILITY_GET_RSSI_STATUS					0xFF818583
+#define OID_RT_UTILITY_GET_FRAME_DETECTION_STATUS			0xFF818584
+#define OID_RT_UTILITY_GET_AGC_AND_FREQUENCY_OFFSET_ESTIMATION_STATUS	0xFF818585
+#define OID_RT_UTILITY_GET_CHANNEL_ESTIMATION_STATUS			0xFF818586
 /*  */
 
 /*  by Owen on 03/09/19-03/09/22 for RTL8185 */
@@ -199,10 +199,14 @@
 /*  Vincent 8185MP */
 #define OID_RT_PRO_RX_FILTER				0xFF0111C0
 
+/* Andy TEST */
+/* define OID_RT_PRO_WRITE_REGISTRY			0xFF0111C1 */
+/* define OID_RT_PRO_READ_REGISTRY			0xFF0111C2 */
 #define OID_CE_USB_WRITE_REGISTRY			0xFF0111C1
 #define OID_CE_USB_READ_REGISTRY			0xFF0111C2
 
-#define OID_RT_PRO_SET_INITIAL_GA			0xFF0111C3
+
+#define OID_RT_PRO_SET_INITIAL_GAIN			0xFF0111C3
 #define OID_RT_PRO_SET_BB_RF_STANDBY_MODE		0xFF0111C4
 #define OID_RT_PRO_SET_BB_RF_SHUTDOWN_MODE		0xFF0111C5
 #define OID_RT_PRO_SET_TX_CHARGE_PUMP			0xFF0111C6
@@ -216,10 +220,8 @@
 #define OID_RT_AP_GET_CURRENT_TIME_STAMP		0xFF010301
 #define OID_RT_AP_SWITCH_INTO_AP_MODE			0xFF010302
 #define OID_RT_AP_SET_DTIM_PERIOD			0xFF010303
-/*  Determine if driver supports AP mode. */
-#define OID_RT_AP_SUPPORTED				0xFF010304
-/*  Set WPA-PSK passphrase into authenticator. */
-#define OID_RT_AP_SET_PASSPHRASE			0xFF010305
+#define OID_RT_AP_SUPPORTED				0xFF010304	/*  Determine if driver supports AP mode. 2004.08.27, by rcnjko. */
+#define OID_RT_AP_SET_PASSPHRASE			0xFF010305	/*  Set WPA-PSK passphrase into authenticator. 2005.07.08, byrcnjko. */
 
 /*  8187MP. 2004.09.06, by rcnjko. */
 #define OID_RT_PRO8187_WI_POLL				0xFF818780
@@ -253,6 +255,7 @@
 #define OID_RT_RD_ATTRIB_MEM				0xFF87110C/* Q */
 #define OID_RT_WR_ATTRIB_MEM				0xFF87110D/* S */
 
+
 /* Method 2 for H2C/C2H */
 #define OID_RT_PRO_H2C_CMD_MODE				0xFF871110 /* S */
 #define OID_RT_PRO_H2C_CMD_RSP_MODE			0xFF871111 /* Q */
@@ -279,6 +282,7 @@
 #define OID_RT_PRO_SET_BASIC_RATE			0xFF871122/* S */
 #define OID_RT_PRO_READ_TSSI				0xFF871123/* S */
 #define OID_RT_PRO_SET_POWER_TRACKING			0xFF871124/* S */
+
 
 #define OID_RT_PRO_QRY_PWRSTATE				0xFF871150 /* Q */
 #define OID_RT_PRO_SET_PWRSTATE				0xFF871151 /* S */
