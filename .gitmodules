@@ -1,15 +1,19 @@
 [submodule "broadcom-wl"]
 	path = broadcom-wl
 	url = https://github.com/supremegamers/broadcom-wl
+	branch = android
 [submodule "rtl8188fu"]
 	path = rtl8188fu
 	url = https://github.com/supremegamers/rtl8188fu
+	branch = android
 [submodule "rtl8188eu"]
 	path = rtl8188eu
 	url = https://github.com/supremegamers/rtl8188eu
+	branch = android
 [submodule "xpad"]
 	path = xpad
 	url = https://github.com/supremegamers/xpad
+	branch = android
 [submodule "openrazer"]
 	path = openrazer
 	url = https://github.com/supremegamers/openrazer
