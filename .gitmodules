@@ -10,3 +10,7 @@
 [submodule "xpad"]
 	path = xpad
 	url = https://github.com/supremegamers/xpad
+[submodule "openrazer"]
+	path = openrazer
+	url = https://github.com/supremegamers/openrazer
+	branch = android
