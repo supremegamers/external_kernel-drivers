@@ -18,3 +18,9 @@
 	path = openrazer
 	url = https://github.com/supremegamers/openrazer
 	branch = android
+[submodule "rtl8812au"]
+	path = rtl8812au
+	url = https://github.com/supremegamers/rtl8812au
+[submodule "rtl8723bu"]
+	path = rtl8723bu
+	url = https://github.com/supremegamers/rtl8723bu
