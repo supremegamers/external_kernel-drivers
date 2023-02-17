@@ -29,6 +29,7 @@
 #include <linux/miscdevice.h>
 #include <linux/spinlock.h>
 #include <linux/poll.h>
+#include <linux/version.h>
 
 //#include <linux/platform_data/bcm2079x.h>
 #include "bcm2079x.h"
@@ -475,7 +476,11 @@ err_en:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
 static int bcm2079x_remove(struct i2c_client *client)
+#else
+static void bcm2079x_remove(struct i2c_client *client)
+#endif
 {
 	struct bcm2079x_dev *bcm2079x_dev;
 
@@ -495,7 +500,11 @@ static int bcm2079x_remove(struct i2c_client *client)
 
 	dev_info(&client->dev, "removed\n");
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
 	return 0;
+#else
+	return;
+#endif
 }
 
 static const struct of_device_id of_bcm2079x_i2c_match[] = {
