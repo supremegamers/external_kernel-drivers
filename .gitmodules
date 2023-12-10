@@ -48,3 +48,6 @@
 [submodule "rtl8821ce"]
 	path = rtl8821ce
 	url = https://github.com/supremegamers/rtl8821ce
+[submodule "tp_smapi"]
+	path = tp_smapi
+	url = https://github.com/android-generic/tp_smapi
