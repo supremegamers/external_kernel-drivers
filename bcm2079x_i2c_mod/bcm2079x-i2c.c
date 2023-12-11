@@ -338,8 +338,12 @@ static const struct rfkill_ops rfkill_bcm2079x_ops = {
 	.set_block = rfkill_bcm2079x_set_power,
 };
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)
 static int bcm2079x_probe(struct i2c_client *client,
 				const struct i2c_device_id *id)
+#else
+static int bcm2079x_probe(struct i2c_client *client)
+#endif
 {
 	int ret;
 	struct bcm2079x_platform_data *platform_data;
