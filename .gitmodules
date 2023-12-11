@@ -51,3 +51,6 @@
 [submodule "tp_smapi"]
 	path = tp_smapi
 	url = https://github.com/android-generic/tp_smapi
+[submodule "acpi_call"]
+	path = acpi_call
+	url = https://github.com/supremegamers/acpi_call
